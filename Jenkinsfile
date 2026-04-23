@@ -6,7 +6,7 @@ pipeline {
         apiVersion: v1
         kind: Pod
         spec:
-          containers:
+		containers:
           - name: jnlp
             image: jenkins/inbound-agent:latest
           - name: kaniko
@@ -30,6 +30,9 @@ pipeline {
             - sleep
             args:
             - 9999999
+            volumeMounts:
+            - name: kubeconfig
+              mountPath: /root/.kube
           volumes:
           - name: kaniko-secret
             secret:
@@ -37,6 +40,12 @@ pipeline {
               items:
               - key: .dockerconfigjson
                 path: config.json
+          - name: kubeconfig
+            secret:
+              secretName: kubeconfig-secret
+              items:
+              - key: config
+                path: config
       '''
     }
   }

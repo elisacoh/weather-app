@@ -25,7 +25,7 @@ pipeline {
             args:
             - "9999999"
           - name: kubectl
-            image: bitnami/kubectl:latest
+            image: alpine/k8s:1.32.0
             command:
             - sleep
             args:

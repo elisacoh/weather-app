@@ -109,7 +109,7 @@ stage('Update Helm values - dev') {
           sh """
             git config --global user.email "jenkins@devops-elisa.space"
             git config --global user.name "Jenkins"
-            git clone http://root:${GITLAB_TOKEN}@10.0.3.93/root/weather-app-helm.git
+            git clone http://root:${GITLAB_TOKEN}@10.0.3.20/root/weather-app-helm.git
             cd weather-app-helm
             sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values.yaml
             git add values.yaml
@@ -127,7 +127,7 @@ stage('Update Helm values - dev') {
           sh """
             git config --global user.email "jenkins@devops-elisa.space"
             git config --global user.name "Jenkins"
-            git clone http://root:${GITLAB_TOKEN}@10.0.3.93/root/weather-app-helm.git
+            git clone http://root:${GITLAB_TOKEN}@10.0.3.20/root/weather-app-helm.git
             cd weather-app-helm
             sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values.yaml
             git add values.yaml
@@ -145,9 +145,9 @@ stage('Update Helm values - dev') {
           sh """
             git config --global user.email "jenkins@devops-elisa.space"
             git config --global user.name "Jenkins"
-            git clone http://root:${GITLAB_TOKEN}@10.0.3.93/root/weather-app-helm.git
+            git clone http://root:${GITLAB_TOKEN}@10.0.3.20/root/weather-app-helm.git
             cd weather-app-helm
-            sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values.yaml
+            sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values-production.yaml
             git add values.yaml
             git commit -m "ci: update production image to ${SHORT_SHA}"
             git push origin main

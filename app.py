@@ -91,3 +91,11 @@ def debug_geocode():
 
 if __name__ == '__main__':
     app.run()
+
+@app.get("/health")
+def health():
+    """
+    health check endpoint for Kubernetes readiness probe
+    :return: json status ok
+    """
+    return jsonify({"status": "ok"}), 200

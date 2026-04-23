@@ -30,9 +30,12 @@ pipeline {
             - sleep
             args:
             - "9999999"
+            env:
+            - name: KUBECONFIG
+              value: /tmp/kube/config
             volumeMounts:
             - name: kubeconfig
-              mountPath: /root/.kube
+              mountPath: /tmp/kube
           volumes:
           - name: kaniko-secret
             secret:
@@ -143,12 +146,12 @@ pipeline {
     }
   }
 
-	post {
-	    success {
-	      echo "Pipeline succeeded - ${env.BRANCH_NAME}:${env.GIT_COMMIT?.take(7)}"
-	    }
-	    failure {
-	      echo "Pipeline failed - ${env.BRANCH_NAME}:${env.GIT_COMMIT?.take(7)}"
-	    }
+post {
+    success {
+      echo "Pipeline succeeded - ${env.BRANCH_NAME}:${env.GIT_COMMIT?.take(7)}"
+    }
+    failure {
+      echo "Pipeline failed - ${env.BRANCH_NAME}:${env.GIT_COMMIT?.take(7)}"
+    }
   }
 }

@@ -57,6 +57,7 @@ pipeline {
     ECR_REPO     = "275115135718.dkr.ecr.eu-west-1.amazonaws.com/weather-app-infra-weather-app"
     AWS_REGION   = "eu-west-1"
     CLUSTER_NAME = "weather-app-infra-cluster"
+    GITLAB_TOKEN = credentials('gitlab-token')
   }
 
   stages {
@@ -101,45 +102,55 @@ pipeline {
       }
     }
 
-    stage('Deploy to dev') {
+stage('Update Helm values - dev') {
       when { branch 'dev' }
       steps {
         container('kubectl') {
           sh """
-            sed -i "s|IMAGE_PLACEHOLDER|${ECR_REPO}:${SHORT_SHA}|g" k8s/deployment.yaml
-            sed -i "s|NAMESPACE_PLACEHOLDER|dev|g" k8s/deployment.yaml k8s/service.yaml k8s/ingress.yaml
-            sed -i "s|CERT_ARN_PLACEHOLDER|arn:aws:acm:eu-west-1:275115135718:certificate/603b1797-5e02-4075-8108-db2d0eb51869|g" k8s/ingress.yaml
-            kubectl apply -f k8s/
+            git config --global user.email "jenkins@devops-elisa.space"
+            git config --global user.name "Jenkins"
+            git clone http://root:${GITLAB_TOKEN}@10.0.3.93/root/weather-app-helm.git
+            cd weather-app-helm
+            sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values.yaml
+            git add values.yaml
+            git commit -m "ci: update dev image to ${SHORT_SHA}"
+            git push origin main
           """
         }
       }
     }
 
-    stage('Deploy to staging') {
+    stage('Update Helm values - staging') {
       when { branch 'staging' }
       steps {
         container('kubectl') {
           sh """
-            sed -i "s|IMAGE_PLACEHOLDER|${ECR_REPO}:${SHORT_SHA}|g" k8s/deployment.yaml
-            sed -i "s|NAMESPACE_PLACEHOLDER|staging|g" k8s/deployment.yaml k8s/service.yaml k8s/ingress.yaml
-            sed -i "s|CERT_ARN_PLACEHOLDER|arn:aws:acm:eu-west-1:275115135718:certificate/603b1797-5e02-4075-8108-db2d0eb51869|g" k8s/ingress.yaml
-            kubectl apply -f k8s/
+            git config --global user.email "jenkins@devops-elisa.space"
+            git config --global user.name "Jenkins"
+            git clone http://root:${GITLAB_TOKEN}@10.0.3.93/root/weather-app-helm.git
+            cd weather-app-helm
+            sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values.yaml
+            git add values.yaml
+            git commit -m "ci: update staging image to ${SHORT_SHA}"
+            git push origin main
           """
         }
       }
     }
 
-    stage('Deploy to production') {
+    stage('Update Helm values - production') {
       when { branch 'main' }
       steps {
         container('kubectl') {
           sh """
-            sed -i "s|IMAGE_PLACEHOLDER|${ECR_REPO}:${SHORT_SHA}|g" k8s/deployment.yaml
-            sed -i "s|NAMESPACE_PLACEHOLDER|production|g" k8s/deployment.yaml k8s/service.yaml k8s/ingress.yaml
-            sed -i "s|CERT_ARN_PLACEHOLDER|arn:aws:acm:eu-west-1:275115135718:certificate/603b1797-5e02-4075-8108-db2d0eb51869|g" k8s/ingress.yaml
-            kubectl apply -f k8s/
-            kubectl rollout status deployment/flask-app -n production --timeout=120s || \\
-              kubectl rollout undo deployment/flask-app -n production
+            git config --global user.email "jenkins@devops-elisa.space"
+            git config --global user.name "Jenkins"
+            git clone http://root:${GITLAB_TOKEN}@10.0.3.93/root/weather-app-helm.git
+            cd weather-app-helm
+            sed -i "s|tag:.*|tag: \\"${SHORT_SHA}\\"|g" values.yaml
+            git add values.yaml
+            git commit -m "ci: update production image to ${SHORT_SHA}"
+            git push origin main
           """
         }
       }

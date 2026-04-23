@@ -2,11 +2,11 @@ pipeline {
   agent {
     kubernetes {
       namespace 'default'
-      yaml '''
+      yaml """
         apiVersion: v1
         kind: Pod
         spec:
-		containers:
+          containers:
           - name: jnlp
             image: jenkins/inbound-agent:latest
           - name: kaniko
@@ -14,7 +14,7 @@ pipeline {
             command:
             - sleep
             args:
-            - 9999999
+            - "9999999"
             volumeMounts:
             - name: kaniko-secret
               mountPath: /kaniko/.docker
@@ -23,13 +23,13 @@ pipeline {
             command:
             - sleep
             args:
-            - 9999999
+            - "9999999"
           - name: kubectl
             image: bitnami/kubectl:latest
             command:
             - sleep
             args:
-            - 9999999
+            - "9999999"
             volumeMounts:
             - name: kubeconfig
               mountPath: /root/.kube
@@ -46,7 +46,7 @@ pipeline {
               items:
               - key: config
                 path: config
-      '''
+      """
     }
   }
 
@@ -54,6 +54,7 @@ pipeline {
     ECR_REPO     = "275115135718.dkr.ecr.eu-west-1.amazonaws.com/weather-app-infra-weather-app"
     AWS_REGION   = "eu-west-1"
     CLUSTER_NAME = "weather-app-infra-cluster"
+    SHORT_SHA    = ""
   }
 
   stages {
@@ -87,13 +88,13 @@ pipeline {
       }
       steps {
         container('kaniko') {
-          sh '''
-            /kaniko/executor \
-              --context=. \
-              --dockerfile=Dockerfile.multistage \
-              --destination=${ECR_REPO}:${SHORT_SHA} \
+          sh """
+            /kaniko/executor \\
+              --context=. \\
+              --dockerfile=Dockerfile.multistage \\
+              --destination=${ECR_REPO}:${SHORT_SHA} \\
               --destination=${ECR_REPO}:${BRANCH_NAME}-latest
-          '''
+          """
         }
       }
     }
@@ -102,12 +103,12 @@ pipeline {
       when { branch 'dev' }
       steps {
         container('kubectl') {
-          sh '''
+          sh """
             sed -i "s|IMAGE_PLACEHOLDER|${ECR_REPO}:${SHORT_SHA}|g" k8s/deployment.yaml
             sed -i "s|NAMESPACE_PLACEHOLDER|dev|g" k8s/deployment.yaml k8s/service.yaml k8s/ingress.yaml
             sed -i "s|CERT_ARN_PLACEHOLDER|arn:aws:acm:eu-west-1:275115135718:certificate/603b1797-5e02-4075-8108-db2d0eb51869|g" k8s/ingress.yaml
             kubectl apply -f k8s/
-          '''
+          """
         }
       }
     }
@@ -116,12 +117,12 @@ pipeline {
       when { branch 'staging' }
       steps {
         container('kubectl') {
-          sh '''
+          sh """
             sed -i "s|IMAGE_PLACEHOLDER|${ECR_REPO}:${SHORT_SHA}|g" k8s/deployment.yaml
             sed -i "s|NAMESPACE_PLACEHOLDER|staging|g" k8s/deployment.yaml k8s/service.yaml k8s/ingress.yaml
             sed -i "s|CERT_ARN_PLACEHOLDER|arn:aws:acm:eu-west-1:275115135718:certificate/603b1797-5e02-4075-8108-db2d0eb51869|g" k8s/ingress.yaml
             kubectl apply -f k8s/
-          '''
+          """
         }
       }
     }
@@ -130,14 +131,14 @@ pipeline {
       when { branch 'main' }
       steps {
         container('kubectl') {
-          sh '''
+          sh """
             sed -i "s|IMAGE_PLACEHOLDER|${ECR_REPO}:${SHORT_SHA}|g" k8s/deployment.yaml
             sed -i "s|NAMESPACE_PLACEHOLDER|production|g" k8s/deployment.yaml k8s/service.yaml k8s/ingress.yaml
             sed -i "s|CERT_ARN_PLACEHOLDER|arn:aws:acm:eu-west-1:275115135718:certificate/603b1797-5e02-4075-8108-db2d0eb51869|g" k8s/ingress.yaml
             kubectl apply -f k8s/
-            kubectl rollout status deployment/flask-app -n production --timeout=120s || \
+            kubectl rollout status deployment/flask-app -n production --timeout=120s || \\
               kubectl rollout undo deployment/flask-app -n production
-          '''
+          """
         }
       }
     }
@@ -145,10 +146,10 @@ pipeline {
 
   post {
     success {
-      echo "Pipeline succeeded - ${BRANCH_NAME}:${SHORT_SHA}"
+      echo "Pipeline succeeded - ${env.BRANCH_NAME}:${env.SHORT_SHA}"
     }
     failure {
-      echo "Pipeline failed - ${BRANCH_NAME}:${SHORT_SHA}"
+      echo "Pipeline failed - ${env.BRANCH_NAME}:${env.SHORT_SHA}"
     }
   }
 }

@@ -54,7 +54,6 @@ pipeline {
     ECR_REPO     = "275115135718.dkr.ecr.eu-west-1.amazonaws.com/weather-app-infra-weather-app"
     AWS_REGION   = "eu-west-1"
     CLUSTER_NAME = "weather-app-infra-cluster"
-    SHORT_SHA    = ""
   }
 
   stages {
@@ -144,12 +143,12 @@ pipeline {
     }
   }
 
-  post {
-    success {
-      echo "Pipeline succeeded - ${env.BRANCH_NAME}:${env.SHORT_SHA}"
-    }
-    failure {
-      echo "Pipeline failed - ${env.BRANCH_NAME}:${env.SHORT_SHA}"
-    }
+	post {
+	    success {
+	      echo "Pipeline succeeded - ${env.BRANCH_NAME}:${env.GIT_COMMIT?.take(7)}"
+	    }
+	    failure {
+	      echo "Pipeline failed - ${env.BRANCH_NAME}:${env.GIT_COMMIT?.take(7)}"
+	    }
   }
 }

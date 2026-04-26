@@ -8,6 +8,10 @@ from openmeteo_client import OpenMeteoClient
 from weather_service import WeatherService
 
 app = Flask(__name__)
+
+from prometheus_flask_exporter import PrometheusMetrics
+metrics = PrometheusMetrics(app)
+
 client=OpenMeteoClient()
 weather_service=WeatherService(client)
 

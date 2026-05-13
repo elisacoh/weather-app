@@ -43,9 +43,11 @@ pipeline {
 		    steps {
 		        echo '----------------- STARTING STATIC CODE ANALYSIS  ----------------- '
 		        withSonarQubeEnv('sonarqube') {
+                    withEnv(["PATH+SONAR=${tool 'sonarqube-scanner'}/bin"]) {
 		            sh '''
-		                sonar-scanner -Dsonar.projectKey=weather-app -Dsonar.sources=.
+	                   sonar-scanner -Dsonar.projectKey=weather-app -Dsonar.sources=.
 		            '''
+		            }
 		        }
 		        echo '----------------- STATIC CODE ANALYSIS SUCCESSFULL ----------------- '
 		    }

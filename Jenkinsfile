@@ -26,6 +26,16 @@ pipeline {
 			}
 		}
 
+		stage('Step 2 - DOCKER FILE SCAN'){
+			steps {
+				echo '----------------- STARTING DOCKERFILE SCAN ----------------- '
+				sh '''
+					trivy config --severityu HIGH, CRITICAL --exit-code 1 Dockerfile
+				'''
+				echo '----------------- DOCKERFILE SCAN SUCCESSFULL ----------------- '
+			}
+		}
+
 
 		
 	}

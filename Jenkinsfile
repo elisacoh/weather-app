@@ -30,7 +30,7 @@ pipeline {
 			steps {
 				echo '----------------- STARTING DOCKERFILE SCAN ----------------- '
 				sh '''
-					trivy config --severityu HIGH, CRITICAL --exit-code 1 Dockerfile
+					trivy config --severity HIGH, CRITICAL --exit-code 1 Dockerfile
 				'''
 				echo '----------------- DOCKERFILE SCAN SUCCESSFULL ----------------- '
 			}

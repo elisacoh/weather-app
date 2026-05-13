@@ -36,6 +36,24 @@ pipeline {
 			}
 		}
 
+		stage('Step 3 - STATIC CODE ANALYSIS ON MERGE')
+			steps {
+				when {
+					not { branch 'main' }
+				}
+				steps {
+					echo '----------------- STARTING STATIC CODE ANALYSIS  ----------------- '
+
+					withSonarQubeEnv('sonarqube'){
+						sh '''
+							sonar-scanner -Dsonar.projectKey=weather-app -Dsonar.sources=.
+						'''
+					}
+					echo '----------------- STATIC CODE ANALYSIS SUCCESSFULL ----------------- '
+
+				}
+			}
+
 
 		
 	}

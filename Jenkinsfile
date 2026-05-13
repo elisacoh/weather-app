@@ -77,19 +77,22 @@ pipeline {
 			}
 		}
 
-		stage('Step 5 - Verify & Deploy') {
-		    steps {
-		        echo '----------------- STARTING VERIFY & DEPLOY ----------------- '
-		        withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-		            sh '''
-		                DIGEST=$(docker pull $DOCKER_USER/weather-app:$BUILD_NUMBER | grep Digest | awk '{print $2}')
-		                cosign verify --key cosign.pub $DOCKER_USER/weather-app@$DIGEST
-		                docker run -d --name weather-app -p 5000:5000 $DOCKER_USER/weather-app:$BUILD_NUMBER
-		            '''
-		        }
-		        echo '----------------- VERIFY SUCCESSFULL - DEPLOYED ----------------- '
-		    }
-	    }
+			stage('Step 5 - Verify & Deploy') {
+			    steps {
+			        echo '----------------- STARTING VERIFY & DEPLOY ----------------- '
+			        withCredentials([
+			            usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
+			        ]) {
+			            sh '''
+			                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+			                DIGEST=$(docker pull $DOCKER_USER/weather-app:$BUILD_NUMBER | grep Digest | awk '{print $2}')
+			                COSIGN_DOCKER_MEDIA_TYPES=1 cosign verify --key cosign.pub $DOCKER_USER/weather-app@$DIGEST
+			                docker run -d --name weather-app-$BUILD_NUMBER -p 5000:5000 $DOCKER_USER/weather-app:$BUILD_NUMBER
+			            '''
+			        }
+			        echo '----------------- VERIFY SUCCESSFULL - DEPLOYED ----------------- '
+			    }
+			}
 		
 	}
 }

@@ -58,15 +58,16 @@ pipeline {
 				echo '----------------------------- STARTING BUILD, PUSH & SIGN --------------------------'
 				withCredentials([
 					usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS'),
-					file(credentialsId: 'cosign-key', variable: 'COSIGN_KEY')
+					file(credentialsId: 'cosign-key', variable: 'COSIGN_KEY'),
+					string(credentialsId: 'cosign-password', variable: 'COSIGN_PASSWORD')
 				])
 				{
 					sh '''
 						docker build -t $DOCKER_USER/weather-app:$BUILD_NUMBER .
 						echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 					    DIGEST=$(docker push $DOCKER_USER/weather-app:$BUILD_NUMBER | grep digest | awk '{print $3}')
-   						COSIGN_PASSWORD="" cosign sign --yes --key $COSIGN_KEY $DOCKER_USER/weather-app@$DIGEST
-
+						cosign sign --yes --key $COSIGN_KEY $DOCKER_USER/weather-app@$DIGEST
+   						
 						
 						# docker push $DOCKER_USER/weather-app:$BUILD_NUMBER
 						# cosign sign --yes $DOCKER_USER/weather-app:$BUILD_NUMBER

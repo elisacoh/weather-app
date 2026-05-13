@@ -18,9 +18,11 @@ pipeline {
 
 		stage('Step 1 - Dependency Scan') {
 			steps {
+				echo '---------STARTING DEPENDENCIES SCAN--------------------'
 				sh '''
 					trivy fs --severity CRITICAL --exit-code 1 --scanners vuln requirements.txt
 				'''
+				echo '---------DEPENDENCIES SCAN SUCCESSFULL-----------------'
 			}
 		}
 

@@ -1,0 +1,6 @@
+.git
+.gitignore
+Jenkinsfile
+.pre-commit-config.yaml
+.gitleaks.toml
+*.tar.gz

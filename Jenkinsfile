@@ -11,7 +11,7 @@ pipeline {
 		stage('Hello'){
 			steps {
 				echo 'pipeline is working'
-				sh 'whoam'
+				sh 'whoami'
 				sh 'pwd'
 			}
 		}

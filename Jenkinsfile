@@ -11,7 +11,7 @@ pipeline {
 		stage('Hello'){
 			steps {
 				echo 'pipeline is working'
-				sh 'whoam'
+				sh 'whoami'
 				sh 'pwd'
 			}
 		}
@@ -67,12 +67,12 @@ pipeline {
 						echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 					    DIGEST=$(docker push $DOCKER_USER/weather-app:$BUILD_NUMBER | grep digest | awk '{print $3}')
 						cosign sign --yes --key $COSIGN_KEY $DOCKER_USER/weather-app@$DIGEST
-   						
+   					
 						
 						# docker push $DOCKER_USER/weather-app:$BUILD_NUMBER
 						# cosign sign --yes $DOCKER_USER/weather-app:$BUILD_NUMBER
 					'''
-				echo '-------------------------------------- BUILD, PUSH, SIGN SUCCESSFULL --------------------------------------'
+					echo '-------------------------------------- BUILD, PUSH, SIGN SUCCESSFULL --------------------------------------'
 				}
 			}
 		}
@@ -83,14 +83,14 @@ pipeline {
 			        withCredentials([
 			            usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
 			        ]) {
-					sh '''
-					    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-					    DIGEST=$(docker pull $DOCKER_USER/weather-app:$BUILD_NUMBER | grep Digest | awk '{print $2}')
-					    COSIGN_DOCKER_MEDIA_TYPES=1 cosign verify --key cosign.pub $DOCKER_USER/weather-app@$DIGEST
-					    docker stop weather-app 2>/dev/null || true
-					    docker rm weather-app 2>/dev/null || true
-					    docker run -d --name weather-app -p 5000:5000 $DOCKER_USER/weather-app:$BUILD_NUMBER
-					'''
+				sh '''
+				    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+				    DIGEST=$(docker pull $DOCKER_USER/weather-app:$BUILD_NUMBER | grep Digest | awk '{print $2}')
+				    COSIGN_DOCKER_MEDIA_TYPES=1 cosign verify --key cosign.pub $DOCKER_USER/weather-app@$DIGEST
+				    docker stop weather-app 2>/dev/null || true
+				    docker rm weather-app 2>/dev/null || true
+				    docker run -d --name weather-app -p 5000:5000 $DOCKER_USER/weather-app:$BUILD_NUMBER
+				'''
 			        }
 			        echo '----------------- VERIFY SUCCESSFULL - DEPLOYED ----------------- '
 			    }
